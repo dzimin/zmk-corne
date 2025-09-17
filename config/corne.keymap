@@ -26,11 +26,11 @@
         label = "Combos for Caps Word";
         compatible = "zmk,combos";
         /* Комбо для клавиш F и J, теперь включает Caps Word */
-        combo_capslock_fj {
-            timeout-ms = <50>;
-            key-positions = <16 19>;
-            bindings = <&caps_word>;
-        };
+        // combo_capslock_fj {
+        //     timeout-ms = <50>;
+        //     key-positions = <16 19>;
+        //     bindings = <&caps_word>;
+        // };
         
         /* Комбо для клавиш A и SEMI, используемое для активации capslock */
         combo_caps_asemi{
