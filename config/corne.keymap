@@ -102,7 +102,7 @@
             bindings = <
                 &graves                &kp Q          &kp W        &kp E   &kp R   &kp T         &kp Y        &kp U      &kp I         &kp O      &kp P             &kp LBKT
                 &kp TAB                &hm LSHFT A    &kp S        &kp D   &kp F   &kp G         &kp H        &kp J      &kp K         &kp L      &hm RSHFT SEMI    &kp APOS
-                &hm LCTRL LC(LA(A))    &hm LCTRL Z    &kp X        &kp C   &kp V   &kp B         &kp N        &kp M      &kp COMMA     &kp DOT    &mt BSLH FSLH     &kp RBKT
+                &hm LC(LA(SPACE)) LC(LA(A))    &hm LCTRL Z    &kp X        &kp C   &kp V   &kp B         &kp N        &kp M      &kp COMMA     &kp DOT    &mt BSLH FSLH     &kp RBKT
                                        &kp LALT       &hm LGUI SPACE   &ltp LNUM LG(SPACE)       &hm RSHFT ENTER   &lhp NUM BSPC     &ltp FN DEL
             >; 
         };
