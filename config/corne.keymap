@@ -53,32 +53,32 @@
             bindings = <&kp RPAR>;
         };
 
-        /* E + R → LBKT */
+        /* "E + R" = "[" */
         combo_lbkt {
             timeout-ms = <50>;
             key-positions = <3 4>;
-            bindings = <&kp LBKT>;
+            bindings = <&kp LEFT_BRACKET>;
         };
 
-        /* U + I → RBKT */
+        /* "U + I" = "]" */
         combo_rbkt {
             timeout-ms = <50>;
             key-positions = <7 8>;
-            bindings = <&kp RBKT>;
+            bindings = <&kp RIGHT_BRACKET>;
         };
 
-        /* C + V → LCBR */
-        combo_lcbr {
+        /* "C + V" → "{" */
+        combo_lbrc {
             timeout-ms = <50>;
             key-positions = <27 28>;
-            bindings = <&kp LCBR>;
+            bindings = <&kp LEFT_BRACE>;
         };
 
-        /* M + . → RCBR */
-        combo_rcbr {
+        /* "M + ." → "}" */
+        combo_rbrc {
             timeout-ms = <50>;
-            key-positions = <32 34>;
-            bindings = <&kp RCBR>;
+            key-positions = <31 32>;
+            bindings = <&kp RIGHT_BRACE>;
         };
     };
 
