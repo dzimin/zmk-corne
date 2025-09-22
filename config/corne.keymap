@@ -52,6 +52,34 @@
             key-positions = <19 20>;
             bindings = <&kp RPAR>;
         };
+
+        /* E + R → LBKT */
+        combo_lbkt {
+            timeout-ms = <50>;
+            key-positions = <3 4>;
+            bindings = <&kp LBKT>;
+        };
+
+        /* U + I → RBKT */
+        combo_rbkt {
+            timeout-ms = <50>;
+            key-positions = <7 8>;
+            bindings = <&kp RBKT>;
+        };
+
+        /* C + V → LCBR */
+        combo_lcbr {
+            timeout-ms = <50>;
+            key-positions = <27 28>;
+            bindings = <&kp LCBR>;
+        };
+
+        /* M + . → RCBR */
+        combo_rcbr {
+            timeout-ms = <50>;
+            key-positions = <32 34>;
+            bindings = <&kp RCBR>;
+        };
     };
 
     behaviors {
@@ -177,4 +205,5 @@
         };
     };
 };
+
 
