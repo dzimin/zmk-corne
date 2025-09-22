@@ -38,6 +38,20 @@
             key-positions = <13 22>;
             bindings = <&kp CAPSLOCK>;
         };
+
+        /* D + F → LPAR */
+        combo_lpar {
+            timeout-ms = <50>;
+            key-positions = <15 16>;
+            bindings = <&kp LPAR>;
+        };
+
+        /* J + K → RPAR */
+        combo_rpar {
+            timeout-ms = <50>;
+            key-positions = <19 20>;
+            bindings = <&kp RPAR>;
+        };
     };
 
     behaviors {
@@ -104,8 +118,8 @@
                 &kp TAB                &hm LSHFT A    &kp S        &kp D   &kp F   &kp G         &kp H        &kp J      &kp K         &kp L      &hm RSHFT SEMI    &kp APOS
                 &hm LC(LA(SPACE)) LC(LA(A))    &hm LCTRL Z    &kp X        &kp C   &kp V   &kp B         &kp N        &kp M      &kp COMMA     &kp DOT    &mt BSLH FSLH     &kp RBKT
                                        &kp LALT       &hm LGUI SPACE   &ltp LNUM LG(SPACE)       &hm RSHFT ENTER   &lhp NUM BSPC     &ltp FN DEL
-            >; 
-        };
+            >;
+        };    
 
         /* Слой с цифрами и символами */
         num_layer {
@@ -124,8 +138,8 @@
             bindings = <
                 &trans     &kp UP     &kp LEFT  &kp DOWN  &kp RIGHT   &kp PERCENT       &none     &none       &none     &none       &none       &none
                 &trans     &hm LSHFT N1 &kp N2 &kp N3 &kp N4 &kp N5                     &none     &none       &none     &none       &none       &none
-                &trans     &hm LCTRL N6 &kp N7 &kp N8 &kp N9 &kp N0                     &none     &none       &none     &none       &trans      &none 
-                                          &kp ENTER  &hm LGUI BSPC  &trans              &trans    &trans      &trans    
+                &trans     &hm LCTRL N6 &kp N7 &kp N8 &kp N9 &kp N0                     &none     &none       &none     &none       &trans      &none
+                                          &kp ENTER  &hm LGUI BSPC  &trans              &trans    &trans      &trans
             >;
         };    
 
@@ -163,3 +177,4 @@
         };
     };
 };
+
