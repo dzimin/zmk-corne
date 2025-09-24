@@ -15,7 +15,7 @@
 #define LNUM    2  // Альтернативный слой с цифрами (левая рука)
 #define FN      3  // Функциональный слой
 #define APP     4  // Слой для приложений
-#define SYSTEM  5  // Системный слой
+// #define SYSTEM  5  // Системный слой
 
 /* Настройка параметров удержания/тапа */
 &lt { quick-tap-ms = <200>; };
@@ -25,58 +25,59 @@
     combos {
         label = "Combos for Caps Word";
         compatible = "zmk,combos";
+        
         /* Комбо для клавиш F и J, теперь включает Caps Word */
-        // combo_capslock_fj {
-        //     timeout-ms = <50>;
-        //     key-positions = <16 19>;
-        //     bindings = <&caps_word>;
-        // };
+        combo_capslock_fj {
+            timeout-ms = <40>;
+            key-positions = <16 19>;
+            bindings = <&caps_word>;
+        };
         
         /* Комбо для клавиш A и SEMI, используемое для активации capslock */
         combo_caps_asemi{
-            timeout-ms = <50>;
+            timeout-ms = <40>;
             key-positions = <13 22>;
             bindings = <&kp CAPSLOCK>;
         };
 
         /* D + F → LPAR */
         combo_lpar {
-            timeout-ms = <50>;
+            timeout-ms = <40>;
             key-positions = <15 16>;
             bindings = <&kp LPAR>;
         };
 
         /* J + K → RPAR */
         combo_rpar {
-            timeout-ms = <50>;
+            timeout-ms = <40>;
             key-positions = <19 20>;
             bindings = <&kp RPAR>;
         };
 
         /* "E + R" = "[" */
         combo_lbkt {
-            timeout-ms = <50>;
+            timeout-ms = <40>;
             key-positions = <3 4>;
             bindings = <&kp LA(SEMI)>;
         };
 
         /* "U + I" = "]" */
         combo_rbkt {
-            timeout-ms = <50>;
+            timeout-ms = <40>;
             key-positions = <7 8>;
             bindings = <&kp LA(APOS)>;
         };
 
         /* "C + V" → "{" */
         combo_lbrc {
-            timeout-ms = <50>;
+            timeout-ms = <40>;
             key-positions = <27 28>;
             bindings = <&kp LA(LBKT)>;
         };
 
         /* "M + ." → "}" */
         combo_rbrc {
-            timeout-ms = <50>;
+            timeout-ms = <40>;
             key-positions = <31 32>;
             bindings = <&kp LA(RBKT)>;
         };
@@ -156,7 +157,7 @@
                 &kp LA(GRAVE) &kp EXCL &kp AT &kp HASH &kp DLLR &kp PERCENT        &kp CARET      &kp AMPS      &kp UP      &kp STAR      &kp PLUS           &kp LA(MINUS)
                 &trans        &hm LSHFT N1 &kp N2 &kp N3 &kp N4 &kp N5             &kp LPAR       &kp LEFT      &kp DOWN    &kp RIGHT     &hm RSHFT MINUS    &kp UNDER
                 &trans        &hm LCTRL N6 &kp N7 &kp N8 &kp N9 &kp N0             &kp RPAR       &kp RA(N2)    &kp RA(N3)  &kp RA(N4)    &trans             &kp EQUAL
-                              &trans        &trans        &kp BSPC                  &mo SYSTEM     &trans        &trans  
+                              &trans        &trans        &kp BSPC                 &trans     &trans        &trans  
             >;
         };
 
@@ -194,15 +195,15 @@
         };
 
         /* Системный слой для управления Bluetooth и т.д. */
-        system_layer {
-            label = "System";
-            bindings = <
-                &trans  &bt BT_SEL 0    &bt BT_SEL 1    &bt BT_SEL 2    &bt BT_SEL 3    &bt BT_CLR           &none        &none        &none        &none        &none   &none
-                &trans  &none           &none           &none           &bt BT_SEL 4    &bt BT_SEL 5         &none        &none        &none        &none        &none   &none
-                &trans  &none           &none           &none           &none           &none                &none        &none        &none        &none        &none   &none
-                                        &none           &none           &kp N1          &none                &none        &none
-            >;
-        };
+        // system_layer {
+        //     label = "System";
+        //     bindings = <
+        //         &trans  &bt BT_SEL 0    &bt BT_SEL 1    &bt BT_SEL 2    &bt BT_SEL 3    &bt BT_CLR           &none        &none        &none        &none        &none   &none
+        //         &trans  &none           &none           &none           &bt BT_SEL 4    &bt BT_SEL 5         &none        &none        &none        &none        &none   &none
+        //         &trans  &none           &none           &none           &none           &none                &none        &none        &none        &none        &none   &none
+        //                                 &none           &none           &kp N1          &none                &none        &none
+        //     >;
+        // };
     };
 };
 
