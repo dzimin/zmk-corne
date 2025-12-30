@@ -119,8 +119,8 @@
             compatible = "zmk,behavior-hold-tap";
             label = "LAYER_TAP_PREFERED";
             #binding-cells = <2>;
-            tapping_term_ms = <200>;
-            quick-tap-ms = <100>;
+            tapping_term_ms = <300>;
+            quick-tap-ms = <200>;
             flavor = "tap-preferred";
             bindings = <&mo>, <&kp>;
         };
@@ -146,7 +146,7 @@
                 &graves                &kp Q          &kp W        &kp E   &kp R   &kp T         &kp Y        &kp U      &kp I         &kp O      &kp P             &kp LBKT
                 &kp TAB                &hm LSHFT A    &kp S        &kp D   &kp F   &kp G         &kp H        &kp J      &kp K         &kp L      &hm RSHFT SEMI    &kp APOS
                 &hm LC(LA(SPACE)) LC(LA(A))    &hm LCTRL Z    &kp X        &kp C   &kp V   &kp B         &kp N        &kp M      &kp COMMA     &kp DOT    &mt BSLH FSLH     &kp RBKT
-                                       &kp LALT       &hm LGUI SPACE   &ltp LNUM F16       &hm RSHFT ENTER   &lhp NUM BSPC     &ltp FN DEL
+                                       &kp LALT       &hm LGUI SPACE   &ltp LNUM LG(SPACE)       &hm RSHFT ENTER   &lhp NUM BSPC     &ltp FN DEL
             >;
         };    
 
