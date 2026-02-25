@@ -152,7 +152,7 @@
             bindings = <
                 &lhp APP ESC                &kp Q          &kp W        &kp E   &kp R   &kp T         &kp Y        &kp U      &kp I         &kp O      &kp P             &kp LBKT
                 &kp TAB                &hm LSHFT A    &kp S        &kp D   &kp F   &kp G         &kp H        &kp J      &kp K         &kp L      &hm RSHFT SEMI    &kp APOS
-                &kp LC(LA(A))          &hm LCTRL Z    &kp X        &kp C   &kp V   &kp B         &kp N        &kp M      &kp COMMA     &kp DOT    &kp FSLH          &kp RBKT
+                &kp LC(LA(A))          &hm LCTRL Z    &kp X        &kp C   &kp V   &kp B         &kp N        &kp M      &kp COMMA     &kp DOT    &kp FSLH          &kp BSLH
                                        &kp LALT       &hm LGUI SPACE   &ltp LNUM LG(SPACE)       &hm LC(LA(SPACE)) ENTER   &lhp NUM BSPC     &ltp FN DEL
             >;
         };
