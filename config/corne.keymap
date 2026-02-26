@@ -95,7 +95,7 @@
         graves: grave_escape {
             compatible = "zmk,behavior-mod-morph";
             #binding-cells = <0>;
-            bindings = <&lhp APP GRAVE>, <&kp ESC>;
+            bindings = <&lhp APP F16>, <&kp ESC>;
             mods = <(MOD_LGUI|MOD_RGUI)>;
         };
         
@@ -150,10 +150,10 @@
         default_layer {
             label = "Default";
             bindings = <
-                &lhp APP ESC                &kp Q          &kp W        &kp E   &kp R   &mt GRAVE T        &kp Y        &kp U      &kp I         &kp O      &kp P             &kp LBKT
+                &graves                &kp Q          &kp W        &kp E   &kp R   &hm GRAVE T        &kp Y        &kp U      &kp I         &kp O      &kp P             &kp LBKT
                 &kp TAB                &hm LSHFT A    &kp S        &kp D   &kp F   &kp G         &kp H        &kp J      &kp K         &kp L      &hm RSHFT SEMI    &kp APOS
-                &kp LC(LA(A))          &hm LCTRL Z    &kp X        &kp C   &kp V   &kp B         &kp N        &mt RBKT M      &kp COMMA     &kp DOT    &kp FSLH          &kp BSLH
-                                       &kp LALT       &hm LGUI SPACE   &ltp LNUM LG(SPACE)       &hm LC(LA(SPACE)) ENTER   &lhp NUM BSPC     &ltp FN DEL
+                &kp LC(LA(A))          &hm LCTRL Z    &kp X        &kp C   &kp V   &kp B         &kp N        &hm RBKT M      &kp COMMA     &kp DOT    &kp FSLH          &kp BSLH
+                                       &kp LALT       &hm LGUI SPACE   &ltp LNUM LG(SPACE)       &kp ENTER   &lhp NUM BSPC     &ltp FN DEL
             >;
         };
 
@@ -194,7 +194,7 @@
         app_layer {
             label = "App";
             bindings = <  
-                &trans  &kp LC(LEFT)       &kp LC(LEFT)         &kp LC(UP)              &kp LC(RIGHT)            &kp LC(RIGHT)      &none   &none           &none     &none       &none         &none
+                &trans  &kp LSHFT(LA(K))   &kp LC(LEFT)         &kp LC(UP)              &kp LC(RIGHT)            &kp LC(RIGHT)      &none   &none           &none     &none       &none         &none
                 &trans  &none              &kp LC(LA(LEFT))     &kp LC(LA(DOWN))        &kp LC(LA(RIGHT))        &kp LC(LA(UP))     &kp LG(H)   &none       &none     &none       &none         &none
                 &trans  &kp LC(LA(J))      &kp LC(LA(U))        &kp LC(LA(I))           &kp LC(LA(K))            &kp LC(LA(ENTER))  &none   &kp LC(LA(A))   &none     &none       &none         &none
                         &kp LC(LG(SPACE))  &kp LG(LA(N4))       &trans                                                               &trans  &trans         &trans
