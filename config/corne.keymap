@@ -30,9 +30,8 @@
         wait-ms = <30>;
         tap-ms = <30>;
         bindings
-            = <&macro_press &kp LALT>
-            , <&macro_tap &kp N2 &kp N1 &kp N9 &kp N2>
-            , <&macro_release &kp LALT>
+            = <&kp MINUS>
+            , <&kp LA(DOT)>
             ;
         };
     };
@@ -223,4 +222,3 @@
         // };
     };
 };
-
