@@ -29,7 +29,7 @@
         #binding-cells = <0>;
         wait-ms = <30>;
         tap-ms = <30>;
-        bindings = <&kp MINUS>, <&kp LA(DOT)>;
+        bindings = <&unicode U+2192>;
         };
     };
     combos {
@@ -56,19 +56,19 @@
             bindings = <&arrow_right>; 
         };
 
-        /* J + K → ) */
+        /* J + K → Left Alt + MINUS */ 
         combo_rpar {
             timeout-ms = <40>;
             key-positions = <19 20>;
-            bindings = <&kp RPAR>;
-        };
-
-        /* K + L → Left Alt + MINUS */
-        combo_minus {
-            timeout-ms = <40>;
-            key-positions = <20 21>;
             bindings = <&kp LA(MINUS)>;
         };
+
+        // /* K + L → Left Alt + MINUS */
+        // combo_minus {
+        //     timeout-ms = <40>;
+        //     key-positions = <20 21>;
+        //     bindings = <&kp LA(MINUS)>;
+        // };
 
         /* "E + R" = "[" */
         combo_lbkt {
