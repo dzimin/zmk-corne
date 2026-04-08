@@ -29,7 +29,11 @@
         #binding-cells = <0>;
         wait-ms = <30>;
         tap-ms = <30>;
-        bindings = <&unicode 0x2192>;
+        bindings
+            = <&macro_press &kp LALT>
+            , <&macro_tap &kp N2 &kp N1 &kp N9 &kp N2>
+            , <&macro_release &kp LALT>
+            ;
         };
     };
     combos {
@@ -219,5 +223,4 @@
         // };
     };
 };
-
 
