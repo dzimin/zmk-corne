@@ -29,7 +29,7 @@
         #binding-cells = <0>;
         wait-ms = <30>;
         tap-ms = <30>;
-        bindings = <&unicode U+2192>;
+        bindings = <&unicode 0x2192>;
         };
     };
     combos {
@@ -155,8 +155,8 @@
         default_layer {
             label = "Default";
             bindings = <
-//                &lhp APP ESC           &kp Q          &kp W        &kp E   &kp R   &hm GRAVE T        &kp Y        &kp U      &kp I         &kp O      &kp P             &kp LBKT
-                &graves                &kp Q          &kp W        &kp E   &kp R   &hm GRAVE T        &kp Y        &kp U      &kp I         &kp O      &kp P             &kp LBKT
+                // &graves                &kp Q          &kp W        &kp E   &kp R   &hm GRAVE T        &kp Y        &kp U      &kp I         &kp O      &kp P             &kp LBKT
+               &lhp APP ESC           &kp Q          &kp W        &kp E   &kp R   &hm GRAVE T        &kp Y        &kp U      &kp I         &kp O      &kp P             &kp LBKT
                 &hm LC(TAB) TAB        &hm LSHFT A    &kp S        &kp D   &kp F   &kp G         &kp H        &kp J      &kp K         &kp L      &hm RSHFT SEMI    &kp APOS
                 &kp LC(LA(A))          &hm LCTRL Z    &kp X        &kp C   &kp V   &kp B         &kp N        &hm RBKT M      &kp COMMA     &kp DOT    &kp FSLH          &kp BSLH
                                        &kp LALT       &hm LGUI SPACE   &ltp LNUM LG(SPACE)       &kp ENTER   &lhp NUM BSPC     &ltp FN DEL
