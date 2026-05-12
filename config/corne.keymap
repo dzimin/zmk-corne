@@ -59,19 +59,19 @@
             bindings = <&arrow_right>; 
         };
 
-        /* J + K → Left Alt + MINUS */ 
-        combo_rpar {
-            timeout-ms = <40>;
-            key-positions = <19 20>;
-            bindings = <&kp LA(MINUS)>;
-        };
-
-        // /* K + L → Left Alt + MINUS */
-        // combo_minus {
+        // /* J + K → Left Alt + MINUS */ 
+        // combo_rpar {
         //     timeout-ms = <40>;
-        //     key-positions = <20 21>;
+        //     key-positions = <19 20>;
         //     bindings = <&kp LA(MINUS)>;
         // };
+
+        /* K + L → Left Alt + MINUS */
+        combo_minus {
+            timeout-ms = <40>;
+            key-positions = <20 21>;
+            bindings = <&kp LA(MINUS)>;
+        };
 
         /* "E + R" = "[" */
         combo_lbkt {
