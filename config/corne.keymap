@@ -45,12 +45,12 @@
             bindings = <&caps_word>;
         };
         
-        /* Комбо для клавиш A и SEMI, используемое для активации capslock */
-        combo_caps_asemi {
-            timeout-ms = <40>;
-            key-positions = <13 22>;
-            bindings = <&kp CAPSLOCK>;
-        };
+        // /* Комбо для клавиш A и SEMI, используемое для активации capslock */
+        // combo_caps_asemi {
+        //     timeout-ms = <40>;
+        //     key-positions = <13 22>;
+        //     bindings = <&kp CAPSLOCK>;
+        // };
 
         /* D + F → -> */
         combo_lpar {
@@ -59,12 +59,12 @@
             bindings = <&arrow_right>; 
         };
 
-        // /* J + K → Left Alt + MINUS */ 
-        // combo_rpar {
-        //     timeout-ms = <40>;
-        //     key-positions = <19 20>;
-        //     bindings = <&kp LA(MINUS)>;
-        // };
+        /* J + K → Left Alt + MINUS */ 
+        combo_rpar {
+            timeout-ms = <40>;
+            key-positions = <19 20>;
+            bindings = <&kp LA(MINUS)>;
+        };
 
         /* K + L → Left Alt + MINUS */
         combo_minus {
@@ -209,16 +209,5 @@
                         &kp LC(LG(SPACE))  &kp LG(LA(N4))       &trans                                                               &trans  &trans         &trans
             >;
         };
-
-        /* Системный слой для управления Bluetooth и т.д. */
-        // system_layer {
-        //     label = "System";
-        //     bindings = <
-        //         &trans  &bt BT_SEL 0    &bt BT_SEL 1    &bt BT_SEL 2    &bt BT_SEL 3    &bt BT_CLR           &none        &none        &none        &none        &none   &none
-        //         &trans  &none           &none           &none           &bt BT_SEL 4    &bt BT_SEL 5         &none        &none        &none        &none        &none   &none
-        //         &trans  &none           &none           &none           &none           &none                &none        &none        &none        &none        &none   &none
-        //                                 &none           &none           &kp N1          &none                &none        &none
-        //     >;
-        // };
     };
 };
