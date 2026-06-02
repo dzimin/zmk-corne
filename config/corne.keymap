@@ -34,17 +34,7 @@
             , <&kp LA(DOT)>
             ;
         };
-    arrow_left: arrow_left {
-        compatible = "zmk,behavior-macro";
-        #binding-cells = <0>;
-        wait-ms = <30>;
-        tap-ms = <30>;
-        bindings
-            = <&kp LA(COMMA)>
-            , <&kp MINUS>
-            ;
-        };
-    }; 
+    };
     combos {
         compatible = "zmk,combos";
         
@@ -55,12 +45,12 @@
             bindings = <&caps_word>;
         };
         
-        /* Комбо для клавиш A и SEMI, используемое для активации capslock */
-        combo_caps_asemi {
-            timeout-ms = <40>;
-            key-positions = <13 22>;
-            bindings = <&kp CAPSLOCK>;
-        };
+        // /* Комбо для клавиш A и SEMI, используемое для активации capslock */
+        // combo_caps_asemi {
+        //     timeout-ms = <40>;
+        //     key-positions = <13 22>;
+        //     bindings = <&kp CAPSLOCK>;
+        // };
 
         /* D + F → -> */
         combo_lpar {
@@ -73,7 +63,7 @@
         combo_rpar {
             timeout-ms = <40>;
             key-positions = <19 20>;
-            bindings = <&arrow_left>;
+            bindings = <&kp LA(MINUS)>;
         };
 
         /* K + L → Left Alt + MINUS */
@@ -168,8 +158,8 @@
         default_layer {
             label = "Default";
             bindings = <
-                &graves                &kp Q          &kp W        &kp E   &kp R   &hm GRAVE T        &kp Y        &kp U      &kp I         &kp O      &kp P             &kp LBKT
-            //    &lhp APP ESC           &kp Q          &kp W        &kp E   &kp R   &hm GRAVE T        &kp Y        &kp U      &kp I         &kp O      &kp P             &kp LBKT
+                // &graves                &kp Q          &kp W        &kp E   &kp R   &hm GRAVE T        &kp Y        &kp U      &kp I         &kp O      &kp P             &kp LBKT
+               &lhp APP ESC           &kp Q          &kp W        &kp E   &kp R   &hm GRAVE T        &kp Y        &kp U      &kp I         &kp O      &kp P             &kp LBKT
                 &hm LC(TAB) TAB        &hm LSHFT A    &kp S        &kp D   &kp F   &kp G         &kp H        &kp J      &kp K         &kp L      &hm RSHFT SEMI    &kp APOS
                 &kp LC(LA(A))          &hm LCTRL Z    &kp X        &kp C   &kp V   &kp B         &kp N        &hm RBKT M      &kp COMMA     &kp DOT    &kp FSLH          &kp BSLH
                                        &kp LALT       &hm LGUI SPACE   &ltp LNUM LG(SPACE)       &kp ENTER   &lhp NUM BSPC     &ltp FN DEL
@@ -219,16 +209,5 @@
                         &kp LC(LG(SPACE))  &kp LG(LA(N4))       &trans                                                               &trans  &trans         &trans
             >;
         };
-
-        /* Системный слой для управления Bluetooth и т.д. */
-        // system_layer {
-        //     label = "System";
-        //     bindings = <
-        //         &trans  &bt BT_SEL 0    &bt BT_SEL 1    &bt BT_SEL 2    &bt BT_SEL 3    &bt BT_CLR           &none        &none        &none        &none        &none   &none
-        //         &trans  &none           &none           &none           &bt BT_SEL 4    &bt BT_SEL 5         &none        &none        &none        &none        &none   &none
-        //         &trans  &none           &none           &none           &none           &none                &none        &none        &none        &none        &none   &none
-        //                                 &none           &none           &kp N1          &none                &none        &none
-        //     >;
-        // };
     };
 };
