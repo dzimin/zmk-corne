@@ -19,12 +19,6 @@ config BT_MAX_CONN
 config BT_MAX_PAIRED
     default 8
 
-# The pinned display module still uses the old battery feature name
-# Keep its peripheral battery widget enabled with ZMK v0.2's renamed setting
-config ZMK_BATTERY
-    bool
-    default ZMK_BATTERY_REPORTING
-
 if ZMK_DISPLAY
 
 config I2C
