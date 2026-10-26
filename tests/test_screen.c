@@ -106,7 +106,13 @@ static void test_pixels(void) {
     }
     assert(!lit(guarded.frame, 10, 12)); /* empty at 0% */
     assert(lit(guarded.frame, 52, 12) && !lit(guarded.frame, 56, 12)); /* 20% */
-    assert(lit(guarded.frame, 94, 12) && lit(guarded.frame, 110, 12)); /* full */
+    assert(lit(guarded.frame, 107, 12) && lit(guarded.frame, 123, 12)); /* full */
+    assert(lit(guarded.frame, 127, 13)); /* terminal reaches the right edge */
+    s.batteries[2].level = 0;
+    corne_screen_render(&s, guarded.frame);
+    assert(lit(guarded.frame, 93, 11)); /* low-charge warning stays visible before R */
+    s.batteries[2].level = 100;
+    corne_screen_render(&s, guarded.frame);
     uint8_t known[1024];
     memcpy(known, guarded.frame, sizeof(known));
     s.batteries[0].known = false;

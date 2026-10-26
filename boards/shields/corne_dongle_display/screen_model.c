@@ -168,7 +168,10 @@ static void battery(uint8_t *f, int x, char label, struct corne_battery b) {
     } else {
         int level = b.level > 100 ? 100 : b.level;
         rect(f, x+10, 12, (17 * level + 50) / 100, 5, true);
-        if (level <= 20) text(f, x+31, 11, "!", 1);
+        if (level <= 20) {
+            int alert_x = x + 36 <= CORNE_SCREEN_WIDTH ? x + 31 : x - 6;
+            text(f, alert_x, 11, "!", 1);
+        }
     }
 }
 
@@ -181,7 +184,7 @@ void corne_screen_render(const struct corne_screen *s, uint8_t frame[CORNE_FRAME
     text(frame, 128 - (int)strlen(output) * 6, 0, output, 7);
     battery(frame, 0, 'L', s->batteries[0]);
     battery(frame, 42, 'D', s->batteries[1]);
-    battery(frame, 84, 'R', s->batteries[2]);
+    battery(frame, CORNE_SCREEN_WIDTH - 31, 'R', s->batteries[2]);
     if (s->usb_powered) {
         /* A separate cable/plug marker, never a charging lightning bolt. */
         rect(frame, 79, 12, 4, 4, false);
