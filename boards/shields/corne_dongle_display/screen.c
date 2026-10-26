@@ -12,6 +12,7 @@
 #include <zephyr/drivers/display.h>
 #include <zephyr/drivers/sensor.h>
 #include <zephyr/kernel.h>
+#include <zephyr/sys/atomic.h>
 #include <zmk/ble.h>
 #include <zmk/display.h>
 #include <zmk/endpoints.h>
@@ -35,7 +36,7 @@ static const struct device *const panel = DEVICE_DT_GET(DT_CHOSEN(zephyr_display
 static struct corne_screen model;
 static uint8_t modifier_counts[8];
 static bool dirty = true;
-static bool ready;
+static atomic_t ready;
 static bool blanked;
 K_MUTEX_DEFINE(model_lock);
 
@@ -52,7 +53,7 @@ static const lv_img_dsc_t image_descriptor = {
 
 static void render_work_cb(struct k_work *work) {
     k_mutex_lock(&model_lock, K_FOREVER);
-    if (!ready) {
+    if (!atomic_get(&ready)) {
         k_mutex_unlock(&model_lock);
         return;
     }
@@ -77,7 +78,7 @@ static void render_work_cb(struct k_work *work) {
 K_WORK_DEFINE(render_work, render_work_cb);
 
 static void request_render(void) {
-    if (ready) k_work_submit_to_queue(zmk_display_work_q(), &render_work);
+    if (atomic_get(&ready)) k_work_submit_to_queue(zmk_display_work_q(), &render_work);
 }
 
 /* Called from a ZMK work queue, never from the display thread. */
@@ -232,7 +233,7 @@ lv_obj_t *zmk_display_status_screen(void) {
     model.usb_powered = zmk_usb_is_powered();
     refresh_status_locked();
     snapshot = model;
-    ready = true;
+    atomic_set(&ready, 1);
     reset_blank_timer();
     k_mutex_unlock(&model_lock);
     corne_screen_render(&snapshot, image_data + 8);
