@@ -1,0 +1,32 @@
+# Copyright (c) 2026 The ZMK Contributors
+# SPDX-License-Identifier: MIT
+
+if SHIELD_CORNE_DONGLE
+
+config ZMK_SPLIT
+    default y
+
+config ZMK_SPLIT_ROLE_CENTRAL
+    default y
+
+config ZMK_SPLIT_BLE_CENTRAL_PERIPHERALS
+    default 2
+
+# Two keyboard peripherals and six host profiles (BT_SEL 0 through 5)
+config BT_MAX_CONN
+    default 8
+
+config BT_MAX_PAIRED
+    default 8
+
+if ZMK_DISPLAY
+
+config I2C
+    default y
+
+config SSD1306
+    default y
+
+endif
+
+endif
