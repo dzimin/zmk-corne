@@ -5,11 +5,44 @@
 #include <stdio.h>
 #include <string.h>
 
+static void refresh_battery_sides(struct corne_screen *s) {
+    if (s->sides_known) {
+        s->batteries[0] = s->peripherals[s->left_source];
+        s->batteries[2] = s->peripherals[1 - s->left_source];
+    } else {
+        /* Neither a charge nor a disconnection can be assigned to a side yet. */
+        s->batteries[0] = s->batteries[2] = (struct corne_battery){.connected = true};
+    }
+}
+
+void corne_screen_peripheral_connection(struct corne_screen *s, uint8_t source, bool connected) {
+    if (source >= 2) return;
+    struct corne_battery *battery = &s->peripherals[source];
+    if (!connected || !battery->connected) battery->known = false;
+    battery->connected = connected;
+    refresh_battery_sides(s);
+}
+
+void corne_screen_peripheral_level(struct corne_screen *s, uint8_t source, uint8_t level) {
+    if (source >= 2 || !s->peripherals[source].connected) return;
+    s->peripherals[source].known = level <= 100;
+    if (level <= 100) s->peripherals[source].level = level;
+    refresh_battery_sides(s);
+}
+
+void corne_screen_peripheral_side(struct corne_screen *s, uint8_t source, bool right) {
+    if (source >= 2 || !s->peripherals[source].connected) return;
+    s->left_source = right ? 1 - source : source;
+    s->sides_known = true;
+    refresh_battery_sides(s);
+}
+
 void corne_screen_init(struct corne_screen *s, int64_t now, bool powered) {
     memset(s, 0, sizeof(*s));
     s->usb_powered = powered;
     s->last_activity = now;
     s->batteries[1].connected = true;
+    refresh_battery_sides(s);
 }
 
 void corne_screen_power(struct corne_screen *s, int64_t now, bool powered) {

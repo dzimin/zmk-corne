@@ -27,6 +27,8 @@
 #include <zmk/hid_indicators.h>
 #include <zmk/events/hid_indicators_changed.h>
 #include <zmk/keymap.h>
+#include <zmk/physical_layouts.h>
+#include <dt-bindings/zmk/matrix_transform.h>
 #include <zmk/split/bluetooth/central.h>
 #include <zmk/usb.h>
 #include <zmk/workqueue.h>
@@ -39,6 +41,28 @@ static bool dirty = true;
 static atomic_t ready;
 static bool blanked;
 K_MUTEX_DEFINE(model_lock);
+
+/* Derive handedness from the existing transform, never from BLE pairing order.
+ * Position events use the selected layout, as in zmk_keymap_get_layer_binding_at_idx. */
+#define STOCK_TRANSFORM DT_PHANDLE(DT_CHOSEN(zmk_physical_layout), transform)
+#define POSITION_IS_RIGHT(node, prop, idx) \
+    (KT_COL(DT_PROP_BY_IDX(node, prop, idx)) >= DT_PROP(STOCK_TRANSFORM, columns) / 2),
+static const bool stock_position_is_right[] = {
+    DT_FOREACH_PROP_ELEM(STOCK_TRANSFORM, map, POSITION_IS_RIGHT)
+};
+BUILD_ASSERT(CONFIG_ZMK_SPLIT_BLE_CENTRAL_PERIPHERALS == 2,
+             "Corne screen expects exactly two keyboard halves");
+
+static void identify_battery_side(const struct zmk_position_state_changed *position) {
+    if (!position->state || position->source >= 2) return;
+    const uint32_t *map;
+    int count = zmk_physical_layouts_get_selected_to_stock_position_map(&map);
+    if (count <= 0 || position->position >= (uint32_t)count) return;
+    uint32_t stock_position = map[position->position];
+    if (stock_position < ARRAY_SIZE(stock_position_is_right))
+        corne_screen_peripheral_side(&model, position->source,
+                                     stock_position_is_right[stock_position]);
+}
 
 /* Indexed 1-bit LVGL image: two BGRA palette entries, then row-major pixels.
  * Static snapshots keep the dedicated display thread's stack small. */
@@ -92,12 +116,9 @@ static void refresh_status_locked(void) {
     model.ble_connected = zmk_ble_active_profile_is_connected();
     model.caps_lock = (zmk_hid_indicators_get_current_profile() & 2) != 0;
     for (int source = 0; source < 2; source++) {
-        int slot = source == 0 ? 0 : 2;
         uint8_t ignored;
         bool connected = zmk_split_get_peripheral_battery_level(source, &ignored) == 0;
-        if (!connected || !model.batteries[slot].connected)
-            model.batteries[slot].known = false;
-        model.batteries[slot].connected = connected;
+        corne_screen_peripheral_connection(&model, source, connected);
     }
 }
 
@@ -194,13 +215,9 @@ static int screen_listener(const zmk_event_t *eh) {
         }
     }
     refresh_status_locked();
-    if (battery && battery->source < 2) {
-        int slot = battery->source == 0 ? 0 : 2;
-        if (model.batteries[slot].connected && battery->state_of_charge <= 100) {
-            model.batteries[slot].level = battery->state_of_charge;
-            model.batteries[slot].known = true;
-        }
-    }
+    if (position) identify_battery_side(position);
+    if (battery)
+        corne_screen_peripheral_level(&model, battery->source, battery->state_of_charge);
     dirty = true;
     k_mutex_unlock(&model_lock);
     request_render();

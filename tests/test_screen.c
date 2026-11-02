@@ -62,6 +62,57 @@ static void test_keys(void) {
     expect_key(&s, 7, 4, 2, "a");
 }
 
+static void test_battery_sides(void) {
+    for (uint8_t left_source = 0; left_source < 2; left_source++) {
+        uint8_t right_source = 1 - left_source;
+        struct corne_screen s;
+        corne_screen_init(&s, 100, false);
+        corne_screen_peripheral_connection(&s, left_source, true);
+        corne_screen_peripheral_connection(&s, right_source, true);
+        corne_screen_peripheral_level(&s, left_source, 87);
+        corne_screen_peripheral_level(&s, right_source, 12);
+        /* BAS can arrive first. Do not guess which physical half it belongs to. */
+        assert(!s.batteries[0].known && !s.batteries[2].known);
+        assert(s.batteries[0].connected && s.batteries[2].connected);
+        corne_screen_peripheral_side(&s, right_source, true);
+        assert(s.batteries[0].known && s.batteries[0].level == 87);
+        assert(s.batteries[2].known && s.batteries[2].level == 12);
+        corne_screen_peripheral_side(&s, left_source, false);
+        assert(s.left_source == left_source);
+        corne_screen_peripheral_level(&s, right_source, 0);
+        assert(s.batteries[2].known && s.batteries[2].level == 0);
+        /* Sleep/disconnection invalidates only that half; no stale charge on reconnect. */
+        corne_screen_peripheral_connection(&s, right_source, false);
+        corne_screen_peripheral_level(&s, right_source, 55);
+        corne_screen_peripheral_side(&s, right_source, false);
+        assert(!s.batteries[2].connected && !s.batteries[2].known);
+        assert(s.batteries[0].known && s.batteries[0].level == 87);
+        corne_screen_peripheral_connection(&s, right_source, true);
+        assert(s.batteries[2].connected && !s.batteries[2].known);
+        corne_screen_peripheral_level(&s, right_source, 54);
+        assert(s.batteries[2].known && s.batteries[2].level == 54);
+        corne_screen_peripheral_level(&s, right_source, 101);
+        assert(!s.batteries[2].known);
+        /* Reject local/generated events and out-of-range BLE slots. */
+        struct corne_screen before = s;
+        for (unsigned source = 2; source <= UINT8_MAX; source++) {
+            corne_screen_peripheral_connection(&s, source, true);
+            corne_screen_peripheral_level(&s, source, 50);
+            corne_screen_peripheral_side(&s, source, false);
+        }
+        assert(memcmp(&s, &before, sizeof(s)) == 0);
+        assert(s.last_activity == 100); /* Battery updates do not count as typing. */
+        /* After receiver restart a key can precede the first BAS report. */
+        corne_screen_init(&s, 0, false);
+        corne_screen_peripheral_connection(&s, left_source, true);
+        corne_screen_peripheral_side(&s, left_source, false);
+        assert(s.batteries[0].connected && !s.batteries[0].known);
+        assert(!s.batteries[2].connected);
+        corne_screen_peripheral_level(&s, left_source, 77);
+        assert(s.batteries[0].known && s.batteries[0].level == 77);
+    }
+}
+
 static void test_history(void) {
     struct corne_screen s;
     corne_screen_init(&s, 0, true);
@@ -150,8 +201,8 @@ static void save_preview(const char *path) {
 }
 
 int main(int argc, char **argv) {
-    test_power(); test_keys(); test_history(); test_pixels();
+    test_power(); test_keys(); test_battery_sides(); test_history(); test_pixels();
     if (argc == 2) save_preview(argv[1]);
-    puts("Screen model: power, key formatting, history and pixels passed");
+    puts("Screen model: power, battery sides, key formatting, history and pixels passed");
     return 0;
 }
