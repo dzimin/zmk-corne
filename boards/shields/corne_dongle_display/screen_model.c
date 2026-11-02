@@ -132,7 +132,7 @@ bool corne_screen_key(struct corne_screen *s, uint16_t page, uint32_t key, uint8
     } else {
         snprintf(name, sizeof(name), "%X:%lX", page, (unsigned long)key);
     }
-    if (strlen(token) + strlen(name) > CORNE_HISTORY_COLUMNS) {
+    if (strlen(token) + strlen(name) > CORNE_KEY_COLUMNS) {
         token[0] = 0;
         if (ctrl) append(token, "C+");
         if (alt) append(token, "A+");
@@ -141,31 +141,8 @@ bool corne_screen_key(struct corne_screen *s, uint16_t page, uint32_t key, uint8
     }
     append(token, name);
     /* The longest possible chord is abbreviated to fit one whole 21-cell row. */
-    snprintf(s->history[s->next], CORNE_TOKEN_SIZE, "%s", token);
-    s->next = (s->next + 1) % CORNE_HISTORY_SIZE;
-    if (s->count < CORNE_HISTORY_SIZE) s->count++;
+    snprintf(s->last_key, sizeof(s->last_key), "%s", token);
     return true;
-}
-
-void corne_screen_history_lines(const struct corne_screen *s, char lines[3][22]) {
-    memset(lines, 0, 3 * 22);
-    size_t row = 0, used = 0;
-    for (size_t i = 0; i < s->count; i++) {
-        const char *token = s->history[(s->next + CORNE_HISTORY_SIZE - s->count + i) %
-                                       CORNE_HISTORY_SIZE];
-        size_t len = strlen(token);
-        if (used && used + 1 + len > CORNE_HISTORY_COLUMNS) {
-            if (row == 2) {
-                memcpy(lines[0], lines[1], 22);
-                memcpy(lines[1], lines[2], 22);
-                memset(lines[2], 0, 22);
-            } else row++;
-            used = 0;
-        }
-        if (used) lines[row][used++] = ' ';
-        memcpy(lines[row] + used, token, len + 1);
-        used += len;
-    }
 }
 
 static void pixel(uint8_t *frame, int x, int y) {
@@ -180,32 +157,45 @@ static void rect(uint8_t *f, int x, int y, int w, int h, bool fill) {
                 pixel(f, x+dx, y+dy);
 }
 
-static void text(uint8_t *f, int x, int y, const char *s, int cells) {
+static void text_pixels(uint8_t *f, int x, int y, const char *s, int cells, bool invert) {
     for (int i = 0; s[i] && i < cells; i++) {
         const uint8_t *rows = corne_glyph(s[i]);
         for (int dy = 0; dy < 7; dy++)
             for (int dx = 0; dx < 5; dx++)
-                if (rows[dy] & (16 >> dx)) pixel(f, x+i*6+dx, y+dy);
+                if (rows[dy] & (16 >> dx)) {
+                    int px = x+i*6+dx, py = y+dy;
+                    if (invert) {
+                        if (px >= 0 && px < CORNE_SCREEN_WIDTH &&
+                            py >= 0 && py < CORNE_SCREEN_HEIGHT)
+                            f[py * 16 + px / 8] ^= (uint8_t)(0x80 >> (px % 8));
+                    } else pixel(f, px, py);
+                }
     }
 }
 
+static void text(uint8_t *f, int x, int y, const char *s, int cells) {
+    text_pixels(f, x, y, s, cells, false);
+}
+
 static void battery(uint8_t *f, int x, char label, struct corne_battery b) {
-    char name[] = {label, 0};
-    text(f, x, 11, name, 1);
-    rect(f, x+8, 10, 21, 9, false);
-    rect(f, x+29, 13, 2, 3, true);
+    /* Approved 36x17 body: a one-pixel gap separates its outline and fill. */
+    int level = b.level > 100 ? 100 : b.level;
+    bool known = b.connected && b.known;
+    char name[] = {label, known && level <= 20 ? '!' : 0, 0};
+    text(f, x + (36 - ((int)strlen(name)*6 - 1))/2, 11, name, 2);
+    rect(f, x, 21, 36, 17, false);
+    rect(f, x+36, 28, 2, 4, true);
+    char value[5];
     if (!b.connected) {
-        text(f, x+17, 11, "x", 1);
+        snprintf(value, sizeof(value), "x");
     } else if (!b.known) {
-        text(f, x+17, 11, "?", 1);
+        snprintf(value, sizeof(value), "?");
     } else {
-        int level = b.level > 100 ? 100 : b.level;
-        rect(f, x+10, 12, (17 * level + 50) / 100, 5, true);
-        if (level <= 20) {
-            int alert_x = x + 36 <= CORNE_SCREEN_WIDTH ? x + 31 : x - 6;
-            text(f, alert_x, 11, "!", 1);
-        }
+        rect(f, x+2, 23, (32 * level + 50) / 100, 13, true);
+        snprintf(value, sizeof(value), "%d%%", level);
     }
+    /* XOR each glyph pixel: black over the fill, white over the empty part. */
+    text_pixels(f, x + (36 - ((int)strlen(value)*6 - 1))/2, 26, value, 4, true);
 }
 
 void corne_screen_render(const struct corne_screen *s, uint8_t frame[CORNE_FRAME_BYTES]) {
@@ -214,27 +204,24 @@ void corne_screen_render(const struct corne_screen *s, uint8_t frame[CORNE_FRAME
     char output[8];
     if (s->usb_output) snprintf(output, sizeof(output), "USB");
     else snprintf(output, sizeof(output), "BT%u%s", s->profile, s->ble_connected ? "" : "?");
-    text(frame, 128 - (int)strlen(output) * 6, 0, output, 7);
+    text(frame, 128 - ((int)strlen(output) * 6 - 1), 0, output, 7);
     battery(frame, 0, 'L', s->batteries[0]);
-    battery(frame, 42, 'D', s->batteries[1]);
-    battery(frame, CORNE_SCREEN_WIDTH - 31, 'R', s->batteries[2]);
+    battery(frame, 45, 'D', s->batteries[1]);
+    battery(frame, 90, 'R', s->batteries[2]);
     if (s->usb_powered) {
         /* A separate cable/plug marker, never a charging lightning bolt. */
-        rect(frame, 79, 12, 4, 4, false);
-        pixel(frame, 79, 10); pixel(frame, 82, 10);
-        pixel(frame, 79, 11); pixel(frame, 82, 11);
-        rect(frame, 80, 16, 2, 3, true);
+        rect(frame, 70, 12, 4, 4, false);
+        pixel(frame, 70, 10); pixel(frame, 73, 10);
+        pixel(frame, 70, 11); pixel(frame, 73, 11);
+        rect(frame, 71, 16, 2, 2, true);
     }
     const char *mods[] = {"Ctrl", "Alt", "Cmd", "Shift"};
     const uint8_t masks[] = {0x11, 0x44, 0x88, 0x22};
     const int xs[] = {1, 31, 55, 79};
     for (int i = 0; i < 4; i++) {
-        text(frame, xs[i], 23, mods[i], 5);
-        if (s->modifiers & masks[i]) rect(frame, xs[i]-1, 21, strlen(mods[i])*6+1, 11, false);
+        text(frame, xs[i], 44, mods[i], 5);
+        if (s->modifiers & masks[i]) rect(frame, xs[i]-1, 42, strlen(mods[i])*6+1, 11, false);
     }
-    if (s->caps_lock) text(frame, 117, 23, "C", 1);
-    for (int x = 0; x < 128; x += 2) pixel(frame, x, 33);
-    char lines[3][22];
-    corne_screen_history_lines(s, lines);
-    for (int row = 0; row < 3; row++) text(frame, 0, 36 + row*10, lines[row], 21);
+    if (s->caps_lock) text(frame, 117, 44, "C", 1);
+    text(frame, 0, 57, s->last_key[0] ? s->last_key : "-", CORNE_KEY_COLUMNS);
 }

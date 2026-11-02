@@ -8,9 +8,8 @@
 #define CORNE_SCREEN_WIDTH 128
 #define CORNE_SCREEN_HEIGHT 64
 #define CORNE_FRAME_BYTES (CORNE_SCREEN_WIDTH * CORNE_SCREEN_HEIGHT / 8)
-#define CORNE_HISTORY_SIZE 64
 #define CORNE_TOKEN_SIZE 22
-#define CORNE_HISTORY_COLUMNS 21
+#define CORNE_KEY_COLUMNS 21
 
 struct corne_battery {
     bool connected;
@@ -31,9 +30,7 @@ struct corne_screen {
     struct corne_battery peripherals[2]; /* BLE slots, not physical sides */
     bool sides_known;
     uint8_t left_source;
-    char history[CORNE_HISTORY_SIZE][CORNE_TOKEN_SIZE];
-    size_t next;
-    size_t count;
+    char last_key[CORNE_TOKEN_SIZE];
 };
 
 void corne_screen_init(struct corne_screen *s, int64_t now, bool powered);
@@ -43,6 +40,5 @@ void corne_screen_peripheral_level(struct corne_screen *s, uint8_t source, uint8
 void corne_screen_peripheral_side(struct corne_screen *s, uint8_t source, bool right);
 bool corne_screen_visible(const struct corne_screen *s, int64_t now, int32_t timeout);
 bool corne_screen_key(struct corne_screen *s, uint16_t page, uint32_t key, uint8_t mods);
-void corne_screen_history_lines(const struct corne_screen *s, char lines[3][22]);
 void corne_screen_render(const struct corne_screen *s, uint8_t frame[CORNE_FRAME_BYTES]);
 const uint8_t *corne_glyph(char c);

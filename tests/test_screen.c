@@ -6,7 +6,7 @@
 #include "screen_model.h"
 
 static const char *last(const struct corne_screen *s) {
-    return s->history[(s->next + CORNE_HISTORY_SIZE - 1) % CORNE_HISTORY_SIZE];
+    return s->last_key;
 }
 
 static void expect_key(struct corne_screen *s, unsigned page, unsigned key,
@@ -54,9 +54,8 @@ static void test_keys(void) {
     expect_key(&s, 7, 115, 0, "F24");
     expect_key(&s, 12, 0xe9, 0, "Vol+");
     expect_key(&s, 7, 0xfe, 0, "KFE");
-    size_t count = s.count;
     assert(!corne_screen_key(&s, 7, 0xe0, 0));
-    assert(s.count == count);
+    assert(strcmp(last(&s), "KFE") == 0);
     s.caps_lock = true;
     expect_key(&s, 7, 4, 0, "A");
     expect_key(&s, 7, 4, 2, "a");
@@ -113,32 +112,47 @@ static void test_battery_sides(void) {
     }
 }
 
-static void test_history(void) {
+static void test_last_key(void) {
     struct corne_screen s;
     corne_screen_init(&s, 0, true);
-    for (unsigned key = 1000; key < 1100; key++) corne_screen_key(&s, 7, key, 0);
-    assert(s.count == 64);
-    assert(strcmp(s.history[s.next], "K40C") == 0); /* oldest surviving event, 1036 */
-    char lines[3][22];
-    corne_screen_history_lines(&s, lines);
-    assert(strstr(lines[2], "K44B") != NULL);
-    for (int row = 0; row < 3; row++) assert(strlen(lines[row]) <= 21);
-    corne_screen_key(&s, 7, 42, 0);
-    assert(strcmp(last(&s), "Backspace") == 0 && s.count == 64);
-    corne_screen_history_lines(&s, lines);
-    assert(strstr(lines[2], "Backspace") != NULL);
-    corne_screen_init(&s, 0, false);
-    corne_screen_history_lines(&s, lines);
-    assert(!lines[0][0] && !lines[1][0] && !lines[2][0]);
-    /* Rapid macro events must all survive before the first render. */
+    assert(s.last_key[0] == 0);
+    expect_key(&s, 7, 42, 15, "C+A+G+S+Backspace");
+    expect_key(&s, 7, 4, 0, "a"); /* A shorter event replaces the whole previous one. */
+    expect_key(&s, 7, 6, 8, "Cmd+C");
+    for (unsigned key = 0xe0; key <= 0xe7; key++)
+        assert(!corne_screen_key(&s, 7, key, 0));
+    assert(strcmp(last(&s), "Cmd+C") == 0);
+    s.modifiers = 0; /* Releasing modifiers must not erase the last combination. */
+    corne_screen_power(&s, 0, false);
+    assert(!corne_screen_visible(&s, 30000, 30000));
+    corne_screen_power(&s, 40000, true);
+    assert(strcmp(last(&s), "Cmd+C") == 0);
+    /* A rapid macro retains only its final processed key, even before a render. */
     expect_key(&s, 7, 45, 0, "-");
     expect_key(&s, 7, 55, 4, "Alt+.");
-    corne_screen_history_lines(&s, lines);
-    assert(strcmp(lines[0], "- Alt+.") == 0);
+    for (unsigned key = 1000; key < 1100; key++) corne_screen_key(&s, 7, key, 0);
+    assert(strcmp(last(&s), "K44B") == 0);
+    assert(strlen(last(&s)) <= CORNE_KEY_COLUMNS);
+    corne_screen_init(&s, 0, false);
+    assert(s.last_key[0] == 0);
 }
 
 static bool lit(const uint8_t *f, int x, int y) {
     return (f[y * 16 + x/8] & (0x80 >> (x%8))) != 0;
+}
+
+static void expect_text_pixels(const uint8_t *frame, int x, int y, const char *value,
+                               int fill_end) {
+    for (size_t i = 0; value[i]; i++) {
+        const uint8_t *glyph = corne_glyph(value[i]);
+        for (int dy = 0; dy < 7; dy++) {
+            for (int dx = 0; dx < (value[i+1] ? 6 : 5); dx++) {
+                int px = x + (int)i*6 + dx;
+                bool stroke = dx < 5 && (glyph[dy] & (16 >> dx));
+                assert(lit(frame, px, y+dy) == ((px < fill_end) != stroke));
+            }
+        }
+    }
 }
 
 static void test_pixels(void) {
@@ -146,36 +160,60 @@ static void test_pixels(void) {
     corne_screen_init(&s, 0, false);
     snprintf(s.layer, sizeof(s.layer), "Default");
     s.usb_output = true;
-    s.batteries[0] = (struct corne_battery){true, true, 0};
-    s.batteries[1] = (struct corne_battery){true, true, 20};
-    s.batteries[2] = (struct corne_battery){true, true, 100};
     struct {uint8_t before[16], frame[1024], after[16];} guarded;
     memset(&guarded, 0xa5, sizeof(guarded));
-    corne_screen_render(&s, guarded.frame);
-    for (int i = 0; i < 16; i++) {
-        assert(guarded.before[i] == 0xa5 && guarded.after[i] == 0xa5);
+    /* Every percentage, on every battery: glyphs invert individually where
+     * the fill crosses them, including the digit-width changes at 10 and 100. */
+    for (int level = 0; level <= 100; level++) {
+        for (int slot = 0; slot < 3; slot++)
+            s.batteries[slot] = (struct corne_battery){true, true, level};
+        corne_screen_render(&s, guarded.frame);
+        for (int slot = 0; slot < 3; slot++) {
+            int x = slot*45, width = (32*level + 50)/100;
+            char value[5];
+            snprintf(value, sizeof(value), "%d%%", level);
+            expect_text_pixels(guarded.frame, x+(36-((int)strlen(value)*6-1))/2,
+                               26, value, x+2+width);
+            for (int dx = 0; dx < 32; dx++) {
+                assert(lit(guarded.frame, x+2+dx, 23) == (dx < width));
+                assert(lit(guarded.frame, x+2+dx, 35) == (dx < width));
+            }
+            assert(lit(guarded.frame, x, 21) && lit(guarded.frame, x+35, 37));
+            assert(!lit(guarded.frame, x+1, 25)); /* Keep the outline gap. */
+            assert(lit(guarded.frame, x+37, 31));
+            assert(lit(guarded.frame, x+20, 11) == (level <= 20)); /* ! */
+        }
     }
-    assert(!lit(guarded.frame, 10, 12)); /* empty at 0% */
-    assert(lit(guarded.frame, 52, 12) && !lit(guarded.frame, 56, 12)); /* 20% */
-    assert(lit(guarded.frame, 107, 12) && lit(guarded.frame, 123, 12)); /* full */
-    assert(lit(guarded.frame, 127, 13)); /* terminal reaches the right edge */
-    s.batteries[2].level = 0;
+    for (int i = 0; i < 16; i++)
+        assert(guarded.before[i] == 0xa5 && guarded.after[i] == 0xa5);
+    s.batteries[0].level = 255;
     corne_screen_render(&s, guarded.frame);
-    assert(lit(guarded.frame, 93, 11)); /* low-charge warning stays visible before R */
-    s.batteries[2].level = 100;
-    corne_screen_render(&s, guarded.frame);
-    uint8_t known[1024];
-    memcpy(known, guarded.frame, sizeof(known));
+    expect_text_pixels(guarded.frame, 6, 26, "100%", 34);
     s.batteries[0].known = false;
     corne_screen_render(&s, guarded.frame);
-    assert(memcmp(known, guarded.frame, sizeof(known)) != 0);
-    memcpy(known, guarded.frame, sizeof(known));
+    expect_text_pixels(guarded.frame, 15, 26, "?", -1);
+    assert(!lit(guarded.frame, 2, 23) && !lit(guarded.frame, 20, 11));
     s.batteries[0].connected = false;
     corne_screen_render(&s, guarded.frame);
-    assert(memcmp(known, guarded.frame, sizeof(known)) != 0);
+    expect_text_pixels(guarded.frame, 15, 26, "x", -1);
+    assert(!lit(guarded.frame, 2, 35));
     s.usb_powered = true;
+    s.usb_output = false; s.profile = 5; s.ble_connected = false;
+    s.modifiers = 0xff; s.caps_lock = true;
+    corne_screen_key(&s, 7, 42, 15);
     corne_screen_render(&s, guarded.frame);
-    assert(lit(guarded.frame, 79, 10)); /* external power marker */
+    expect_text_pixels(guarded.frame, 105, 0, "BT5?", -1);
+    assert(lit(guarded.frame, 70, 10)); /* USB power independent of selected output. */
+    expect_text_pixels(guarded.frame, 117, 44, "C", -1);
+    expect_text_pixels(guarded.frame, 0, 57, "C+A+G+S+Backspace", -1);
+    assert(lit(guarded.frame, 0, 42) && lit(guarded.frame, 108, 52));
+    s.modifiers = 0;
+    corne_screen_render(&s, guarded.frame);
+    assert(!lit(guarded.frame, 0, 42));
+    expect_text_pixels(guarded.frame, 0, 57, "C+A+G+S+Backspace", -1);
+    corne_screen_init(&s, 0, false);
+    corne_screen_render(&s, guarded.frame);
+    expect_text_pixels(guarded.frame, 0, 57, "-", -1);
 }
 
 static void save_preview(const char *path) {
@@ -185,11 +223,8 @@ static void save_preview(const char *path) {
     s.usb_output = true;
     s.modifiers = 8;
     s.batteries[0] = (struct corne_battery){true, true, 85};
-    s.batteries[2] = (struct corne_battery){true, true, 65};
-    const unsigned keys[] = {20,26,8,4,40,6,25,80,42,4,5,6};
-    const unsigned mods[] = {0,0,0,2,0,8,8,0,0,0,0,0};
-    for (size_t i = 0; i < sizeof(keys)/sizeof(keys[0]); i++)
-        corne_screen_key(&s, 7, keys[i], mods[i]);
+    s.batteries[2] = (struct corne_battery){true, true, 52};
+    corne_screen_key(&s, 7, 6, 8);
     uint8_t frame[1024];
     corne_screen_render(&s, frame);
     FILE *out = fopen(path, "wb");
@@ -201,8 +236,8 @@ static void save_preview(const char *path) {
 }
 
 int main(int argc, char **argv) {
-    test_power(); test_keys(); test_battery_sides(); test_history(); test_pixels();
+    test_power(); test_keys(); test_battery_sides(); test_last_key(); test_pixels();
     if (argc == 2) save_preview(argv[1]);
-    puts("Screen model: power, battery sides, key formatting, history and pixels passed");
+    puts("Screen model: power, battery sides, key formatting, last key and inverted battery pixels passed");
     return 0;
 }

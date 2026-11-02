@@ -5,7 +5,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Test power policy, history and framebuffer with sanitizers
+      - name: Test power policy, last key and battery inversion with sanitizers
         run: python3 tests/run_screen_tests.py --preview /tmp/dongle-screen.png
       - uses: actions/upload-artifact@v4
         with:
