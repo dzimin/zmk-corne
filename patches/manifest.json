@@ -1,0 +1,8 @@
+{
+  "zmk_revision": "241ff39556b3685c9344c4c22fd9a655af8eb3ba",
+  "patch": "0001-zmk-split-battery-disconnect-guard.patch",
+  "patch_sha256": "6534ac135cbd3da27a241fd6d5d4648cff087887cfc4099419b8b7d54f0ffc78",
+  "target": "app/src/split/bluetooth/central.c",
+  "before_sha256": "acaeebbe9748eced030f263abf1a7ff92ff5540878f3c9c05ba54b38dcb0d839",
+  "after_sha256": "615685c1bc4f59493964dcdcb059e0b9216cc6a004ab9f008202aea5df76c0e0"
+}
