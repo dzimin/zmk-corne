@@ -1,0 +1,38 @@
+name: ZMK patch regression
+on: [push, pull_request, workflow_dispatch]
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Checkout pinned ZMK v0.2
+        uses: actions/checkout@v4
+        with:
+          repository: zmkfirmware/zmk
+          ref: 241ff39556b3685c9344c4c22fd9a655af8eb3ba
+          path: build-zmk-tests/zmk
+      - name: Reproduce original error and verify the actual patch
+        run: |
+          python3 tests/test_zmk_ble_disconnect.py \
+            --zmk-root build-zmk-tests/zmk \
+            --patch patches/0001-zmk-split-battery-disconnect-guard.patch \
+            --output-dir build-zmk-tests/results
+      - name: Verify patch integration and cached reapplication
+        run: |
+          python3 scripts/apply_zmk_patches.py build-zmk-tests/zmk
+          python3 scripts/apply_zmk_patches.py build-zmk-tests/zmk
+          python3 - <<'PY'
+          from pathlib import Path
+          import subprocess
+          source = Path('build-zmk-tests/zmk/app/src/split/bluetooth/central.c')
+          source.write_text(source.read_text() + '\n/* unexpected change */\n')
+          result = subprocess.run(['python3', 'scripts/apply_zmk_patches.py', 'build-zmk-tests/zmk'])
+          assert result.returncode != 0, 'Unexpected source must fail closed'
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: zmk-patch-regression
+          path: |
+            build-zmk-tests/results/*.json
+            build-zmk-tests/results/*.c

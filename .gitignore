@@ -1,0 +1,7 @@
+.DS_Store
+backups/
+build/
+build-*/
+.west/
+.venv/
+__pycache__/

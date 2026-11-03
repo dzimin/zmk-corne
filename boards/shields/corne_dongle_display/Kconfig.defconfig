@@ -1,0 +1,39 @@
+# SPDX-License-Identifier: MIT
+if SHIELD_CORNE_DONGLE_DISPLAY
+
+choice ZMK_DISPLAY_STATUS_SCREEN
+    default ZMK_DISPLAY_STATUS_SCREEN_CUSTOM
+endchoice
+
+config ZMK_DISPLAY_STATUS_SCREEN_CUSTOM
+    select LV_USE_IMG
+    select ZMK_LOW_PRIORITY_WORK_QUEUE
+    imply ZMK_HID_INDICATORS
+
+choice ZMK_DISPLAY_WORK_QUEUE
+    default ZMK_DISPLAY_WORK_QUEUE_DEDICATED
+endchoice
+
+config LV_Z_BITS_PER_PIXEL
+    default 1
+
+choice LV_COLOR_DEPTH
+    default LV_COLOR_DEPTH_1
+endchoice
+
+config LV_Z_MEM_POOL_SIZE
+    default 8192
+
+config LV_Z_VDB_SIZE
+    default 64
+
+config CORNE_DONGLE_BATTERY_CONFIRMED
+    bool "Receiver battery circuit has been verified against its devicetree sensor"
+    default n
+    select SENSOR
+    select ZMK_BATTERY
+    help
+        Enable only after checking the receiver hardware. The local screen samples
+        the chosen battery sensor even during USB idle. It does not infer charging.
+
+endif

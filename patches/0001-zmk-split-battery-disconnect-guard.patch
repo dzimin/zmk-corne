@@ -1,0 +1,34 @@
+--- a/app/src/split/bluetooth/central.c
++++ b/app/src/split/bluetooth/central.c
+@@ -422,6 +422,10 @@
+ void peripheral_batt_lvl_change_callback(struct k_work *work) {
+     struct zmk_peripheral_battery_state_changed ev;
+     while (k_msgq_get(&peripheral_batt_lvl_msgq, &ev, K_NO_WAIT) == 0) {
++        if (ev.source >= ARRAY_SIZE(peripheral_battery_levels)) {
++            LOG_WRN("Ignoring battery level update from invalid peripheral source %u", ev.source);
++            continue;
++        }
+         LOG_DBG("Triggering peripheral battery level change %u", ev.state_of_charge);
+         peripheral_battery_levels[ev.source] = ev.state_of_charge;
+         raise_zmk_peripheral_battery_state_changed(ev);
+@@ -971,6 +975,11 @@
+ static void split_central_disconnected(struct bt_conn *conn, uint8_t reason) {
+     char addr[BT_ADDR_LE_STR_LEN];
+     int err;
++    int slot_idx = peripheral_slot_index_for_conn(conn);
++
++    if (slot_idx < 0) {
++        return;
++    }
+ 
+     bt_addr_le_to_str(bt_conn_get_dst(conn), addr, sizeof(addr));
+ 
+@@ -978,7 +987,7 @@
+ 
+ #if IS_ENABLED(CONFIG_ZMK_SPLIT_BLE_CENTRAL_BATTERY_LEVEL_FETCHING)
+     struct zmk_peripheral_battery_state_changed ev = {
+-        .source = peripheral_slot_index_for_conn(conn), .state_of_charge = 0};
++        .source = slot_idx, .state_of_charge = 0};
+     k_msgq_put(&peripheral_batt_lvl_msgq, &ev, K_NO_WAIT);
+     k_work_submit(&peripheral_batt_lvl_work);
+ #endif // IS_ENABLED(CONFIG_ZMK_SPLIT_BLE_CENTRAL_BATTERY_LEVEL_FETCHING)

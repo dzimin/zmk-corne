@@ -20,7 +20,21 @@
 include:
   - board: nice_nano_v2
     shield: settings_reset
+    artifact-name: settings-reset
   - board: nice_nano_v2
     shield: corne_left
+    artifact-name: standalone-left
   - board: nice_nano_v2
     shield: corne_right
+    artifact-name: standalone-right
+  - board: nice_nano_v2
+    shield: corne_dongle corne_dongle_display
+    artifact-name: dongle-central
+  - board: nice_nano_v2
+    shield: corne_left
+    cmake-args: -DCONFIG_ZMK_SPLIT=y -DCONFIG_ZMK_SPLIT_ROLE_CENTRAL=n
+    artifact-name: dongle-left
+  - board: nice_nano_v2
+    shield: corne_right
+    cmake-args: -DCONFIG_ZMK_SPLIT=y -DCONFIG_ZMK_SPLIT_ROLE_CENTRAL=n
+    artifact-name: dongle-right
