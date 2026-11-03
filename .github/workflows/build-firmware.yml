@@ -170,7 +170,7 @@ jobs:
           cp "${{ env.build_dir }}/west-frozen.yml" "${{ env.build_dir }}/evidence/"
           cp "${{ env.base_dir }}/zmk/app/src/split/bluetooth/central.c" "${{ env.build_dir }}/evidence/central.patched.c"
           cp "${GITHUB_WORKSPACE}/patches/manifest.json" "${{ env.build_dir }}/evidence/patch-manifest.json"
-          git -C "${GITHUB_WORKSPACE}" rev-parse HEAD > "${{ env.build_dir }}/evidence/source-commit.txt"
+          git -c safe.directory="${GITHUB_WORKSPACE}" -C "${GITHUB_WORKSPACE}" rev-parse HEAD > "${{ env.build_dir }}/evidence/source-commit.txt"
 
       - name: Archive build evidence
         uses: actions/upload-artifact@v4
