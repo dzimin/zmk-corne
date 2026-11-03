@@ -126,7 +126,7 @@ jobs:
 
       - name: Record resolved dependencies
         working-directory: ${{ env.base_dir }}
-        run: west manifest --freeze > "${{ env.build_dir }}/west-frozen.yml"
+        run: west manifest --freeze --active-only > "${{ env.build_dir }}/west-frozen.yml"
 
       - name: West Zephyr export
         working-directory: ${{ env.base_dir }}
